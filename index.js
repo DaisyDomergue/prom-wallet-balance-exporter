@@ -28,16 +28,26 @@ app.listen(PORT, '0.0.0.0')
 const balance = new client.Gauge({
   name: 'wallet_balance',
   help: 'The Balance of a wallet using native coin',
-  labelNames: ['chain', 'coin', 'address', 'wallet_name'],
+  labelNames: ['chain', 'token', 'address', 'name'],
 
 });
 
 wallets.forEach(wallet => {
+  if (Array.isArray(wallet.chain)) {
+    wallet.chain.forEach(element => {
+      wallet.chain = element
+      getBalance(wallet)      
+    });
+  }else{
+    getBalance(wallet)
+  }
+});
 
+async function getBalance(wallet) {
   switch (wallet.chain) {
     case 'polygon':
       polygonChainBalance(wallet.address).then((wallet_balance) => {
-        balance.set({ chain: wallet.chain, coin: polygon.native_coin, address: wallet.address }, wallet_balance)
+        balance.set({ name: wallet.name, chain: wallet.chain, token: polygon.native_token, address: wallet.address }, wallet_balance)
       }).catch((err) => {
         console.error(err);
       })
@@ -46,7 +56,7 @@ wallets.forEach(wallet => {
 
     case 'ethereum':
       ethereumChainBalance(wallet.address).then((wallet_balance) => {
-        balance.set({ wallet_name: wallet.name, chain: wallet.chain, coin: ethereum.native_coin, address: wallet.address }, wallet_balance)
+        balance.set({ name: wallet.name, chain: wallet.chain, token: ethereum.native_token, address: wallet.address }, wallet_balance)
       }).catch((err) => {
         console.error(err);
       })
@@ -55,7 +65,7 @@ wallets.forEach(wallet => {
 
     case 'gnosis':
       gnosisChainBalance(wallet.address).then((wallet_balance) => {
-        balance.set({ wallet_name: wallet.name, chain: wallet.chain, coin: gnosis.native_coin, address: wallet.address }, wallet_balance)
+        balance.set({ name: wallet.name, chain: wallet.chain, token: gnosis.native_token, address: wallet.address }, wallet_balance)
       }).catch((err) => {
         console.error(err);
       })
@@ -64,10 +74,7 @@ wallets.forEach(wallet => {
     default:
       break;
   }
-
-});
-
-
+}
 async function polygonChainBalance(address) {
   const requestUrl = url.parse(url.format({
     protocol: 'https',
