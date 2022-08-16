@@ -35,10 +35,13 @@ const balance = new client.Gauge({
 wallets.forEach(wallet => {
   if (Array.isArray(wallet.chain)) {
     wallet.chain.forEach(element => {
-      wallet.chain = element
-      getBalance(wallet)      
+      // wallet.chain = element
+      newWallet = {...wallet,chain:element}
+      console.debug("Wallet",newWallet);
+      getBalance(newWallet)      
     });
   }else{
+    console.debug("Wallet",wallet);
     getBalance(wallet)
   }
 });
@@ -131,7 +134,7 @@ async function gnosisChainBalance(address) {
   }));
   try {
     const response = await axios.get(requestUrl.href);
-    console.debug(response);
+    // console.debug(response);
     return parseInt(response.data.result) / Math.pow(10, gnosis.decimal_point)
   } catch (error) {
     console.log(error.response.body);
