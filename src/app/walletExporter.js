@@ -5,6 +5,23 @@ const axios = require('axios')
 const http = require('http')
 const pino = require('pino')
 const express = require('express')
+const rest = require('../rest')
+const { MetricsService } = require('./metricsService')
+
+dotenv.config("../../.env")
+
+const polygon = JSON.parse(process.env.polygon)
+const ethereum = JSON.parse(process.env.ethereum)
+const gnosis = JSON.parse(process.env.gnosis)
+const wallets = JSON.parse(process.env.wallets)
+const PORT = process.env.PORT
+
+const chains = {
+    polygon,
+    ethereum,
+    gnosis
+}
+
 const signals = Object.freeze({
     'SIGINT': 2,
     'SIGTERM': 15,
@@ -18,6 +35,7 @@ class walletExporter {
 
 		expressApp = express(),
 		httpServer = undefined,  /* node http.Server */
+
 		logger = pino({
 			name: 'main',
 			level: logLevel,
@@ -37,6 +55,8 @@ class walletExporter {
 		// Port is the HTTP TCP/IP port.
 		this.port = port
 
+        this.metricsService = new MetricsService(this.logger, wallets, chains)
+
 		// Listen for Linux Signals
 		Object.keys(signals).forEach((signal) => {
 			process.on(signal, () => {
@@ -49,11 +69,10 @@ class walletExporter {
 				})
 			})
 		})
-
 		this.routes()
 	}
     close() {
-        this.joinRequestService.close()
+        this.metricsService.close()
         Object.keys(signals).forEach((signal) => {
             process.removeAllListeners(signal)
         })
@@ -74,7 +93,7 @@ class walletExporter {
         this.expressApp.use(express.json({
             limit: '1kb',
         }))
-        this.expressApp.post('/metrics', (req, res, next) => new rest.walletExporter(this.logger, this.joinRequestService, this.customJoinRequestValidator).handle(req, res, next))
+        this.expressApp.get('/metrics', (req, res) => new rest.metricsHandler(this.logger, this.wallet, this.chains, this.metricsService).handle(req, res))
         this.expressApp.use(rest.error(this.logger))
     }
     listen() {
@@ -89,4 +108,7 @@ class walletExporter {
             })
         })
     }
+}
+module.exports = {
+	walletExporter,
 }
