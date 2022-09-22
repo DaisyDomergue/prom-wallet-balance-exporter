@@ -7,48 +7,39 @@ const packageJson = require('../../../package.json')
 const programName = 'wallet-Exporter'
 
 async function main(argv) {
-	// const program = new commander.Command()
-	// program
-	// 	.name(programName)
-	// 	.description('Prometheus Exporter for multichain wallet balances')
-	// 	.version(packageJson.version, '-v', 'print version')
-	// 	.helpOption('-h', 'print help message')
-	// 	.addOption(new commander.Option('-p <number>', 'port number')
-	// 		.env('PORT'))
-	// 	.addOption(new commander.Option('-l <log level>', 'log level')
-	// 		.default('info', 'options are: trace, debug, info, warn, error, and fatal')
-	// 		.env('LOG_LEVEL'))
-	// 	.parse(argv)
-	// const options = program.opts()
-	// if (options.h) {
-	// 	program.help({
-	// 		error: true,
-	// 	})
-	// }
-	// if (options.v) {
-	// 	process.stdout.write(`${packageJson.version}\n`)
-	// 	process.exit(0)
-	// }
-	// if (options.p) {
-	// 	const min = 1
-	// 	const max = 65535
-	// 	if (options.p < min || options.p > max) {
-	// 		process.stderr.write(`${program.name()}: HTTP port range is ${min} - ${max}\n`)
-	// 		process.exit(1)
-	// 	}
-	// } else {
-	// 	process.stderr.write(`${program.name()}: HTTP port is required.\n`)
-	// 	process.exit(1)
-	// }
-	// if (!options.k) {
-	// 	process.stderr.write(`${program.name()}: Private key is required.\n`)
-	// 	process.exit(1)
-	// }
+	const program = new commander.Command()
+	program.name(programName)
+	program.description('Prometheus Exporter for multichain wallet balances')
+	program.version(packageJson.version, '-v', 'print version')
+	program.helpOption('-h', 'print help message')
+	program.addOption(new commander.Option('-p <number>', 'port number').env('PORT'))
+	program.addOption(new commander.Option('-l <log level>', 'log level').default('info', 'options are: trace, debug, info, warn, error, and fatal').env('LOG_LEVEL'))
+	program.parse(argv)
+	const options = program.opts()
+	if (options.h) {
+		program.help({
+			error: true,
+		})
+	}
+	if (options.v) {
+		process.stdout.write(`${packageJson.version}\n`)
+		process.exit(0)
+	}
+	if (options.p) {
+		const min = 1
+		const max = 65535
+		if (options.p < min || options.p > max) {
+			process.stderr.write(`${program.name()}: HTTP port range is ${min} - ${max}\n`)
+			process.exit(1)
+		}
+	} else {
+		process.stderr.write(`${program.name()}: HTTP port is required.\n`)
+		process.exit(1)
+	}
 
 	const srv = new app.walletExporter({
-		// privateKey: options.k,
-		// port: options.p,
-		// logLevel: options.l,
+		port: options.p,
+		logLevel: options.l,
 	})
 	srv.listen()
 }
