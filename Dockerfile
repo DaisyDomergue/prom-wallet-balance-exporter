@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 9098
-CMD ["node", "index.js"]
+CMD ["node", "src/cmd/walletExporter/main.js"]
