@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "node src/cmd/walletExporter/main.js",
-    "debug": "nodemon --inspect src/cmd/walletExporter/main.js"
+    "debug": "nodemon --inspect src/cmd/walletExporter/main.js "
   },
   "devDependencies": {
     "nodemon": "^2.0.19"

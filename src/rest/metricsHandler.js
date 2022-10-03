@@ -19,15 +19,11 @@ class metricsHandler {
 		this.sendJsonResponse(res, status, errorMessage)
 	}
 
-    async handle(req, res) {
-
-    }
-
 	async handle(req, res) {
-		let member
 		try {
+			this.logger.info("Requesting for a handle")
 			const {metrics,metricsContentType} = await this.metricsService.getMetrics()
-			this.logger.debug(metrics)
+			this.logger.info("Response from get metrics function",metrics)
 			this.sendResponse(res, 200, metrics, metricsContentType)
 		} catch (err) {
 			this.logger.error(err)

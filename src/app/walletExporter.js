@@ -8,14 +8,19 @@ const express = require('express')
 const rest = require('../rest')
 const { MetricsService } = require('./metricsService')
 
-dotenv.config("../../.env")
+dotenv.config({
+    path : "./config/.env",
+    debug : true
+})
+
+
 
 const polygon = JSON.parse(process.env.polygon)
 const ethereum = JSON.parse(process.env.ethereum)
 const gnosis = JSON.parse(process.env.gnosis)
 const wallets = JSON.parse(process.env.wallets)
 const PORT = process.env.PORT
-
+console.log(polygon,ethereum,gnosis,wallets)
 const chains = {
     polygon,
     ethereum,
@@ -29,7 +34,7 @@ const signals = Object.freeze({
 class walletExporter {
     constructor({
 		// HTTP port the server listens on
-		port = 9098,
+		port = PORT,
 		// Logger (pino) level: one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'.
 		logLevel = 'info',
 
@@ -93,7 +98,10 @@ class walletExporter {
         this.expressApp.use(express.json({
             limit: '1kb',
         }))
-        this.expressApp.get('/metrics', (req, res) => new rest.metricsHandler(this.logger, this.wallet, this.chains, this.metricsService).handle(req, res))
+        const metricsHandler = new rest.metricsHandler(this.logger, this.wallet, this.chains, this.metricsService)
+        this.expressApp.get('/metrics', async (req, res) => { 
+            await metricsHandler.handle(req, res)
+        })
         this.expressApp.use(rest.error(this.logger))
     }
     listen() {
