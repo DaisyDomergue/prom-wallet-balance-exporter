@@ -1,5 +1,5 @@
 const { walletExporter } = require('./walletExporter')
-const { metricsService, DataUnionRetrievalError, DataUnionJoinError } = require('./metricsService')
+const { metricsService} = require('./metricsService')
 
 module.exports = {
 	walletExporter,
