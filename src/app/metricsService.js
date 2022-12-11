@@ -1,7 +1,7 @@
 const url = require("url")
 const axios = require('axios')
 const client = require('prom-client');
-
+const Web3 = require("web3")
 
 
 class MetricsService {
@@ -39,7 +39,7 @@ class MetricsService {
 
     async fetchBalances() {
         this.logger.info("Looping through wallets")
-        for(const wallet of this.wallets) {
+        for (const wallet of this.wallets) {
             if (Array.isArray(wallet.chain)) {
                 for (const chain of wallet.chain) {
                     let newWallet = { ...wallet, chain: chain }
@@ -47,7 +47,7 @@ class MetricsService {
                     const wallet_balance = await this.getBalance(newWallet)
                     const token = this.getChainToken(newWallet.chain)
                     this.balance.set({ name: newWallet.name, chain: newWallet.chain, token: token, address: newWallet.address }, wallet_balance)
-            }
+                }
             } else {
                 this.logger.debug("Wallet", wallet);
                 const wallet_balance = await this.getBalance(wallet)
@@ -58,49 +58,58 @@ class MetricsService {
         }
         this.logger.info("Done looping")
     }
-    async getChainToken(chain){
+    async getChainToken(chain) {
         this.logger.info(this.chains[chain].native_token)
         return this.chains[chain].native_token
     }
     async getBalance(wallet) {
-        return new Promise((result,error)=>{
-        switch (wallet.chain) {
-            case 'polygon':
-                this.polygonChainBalance(wallet.address).then((wallet_balance) => {
-                    this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
-                    result(wallet_balance)
-                }).catch((err) => {
-                    this.logger.error(err);
-                    error(err)
-                })
-                break;
+        return new Promise((result, error) => {
+            switch (wallet.chain) {
+                case 'polygon':
+                    this.polygonChainBalance(wallet.address).then((wallet_balance) => {
+                        this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
+                        result(wallet_balance)
+                    }).catch((err) => {
+                        this.logger.error(err);
+                        error(err)
+                    })
+                    break;
 
-            case 'ethereum':
-                this.ethereumChainBalance(wallet.address).then((wallet_balance) => {
-                    this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
-                    result(wallet_balance)
-                }).catch((err) => {
-                    this.logger.error(err);
-                    error(err)
-                })
-                break;
+                case 'ethereum':
+                    this.ethereumChainBalance(wallet.address).then((wallet_balance) => {
+                        this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
+                        result(wallet_balance)
+                    }).catch((err) => {
+                        this.logger.error(err);
+                        error(err)
+                    })
+                    break;
 
+                case 'gnosis':
+                    this.gnosisChainBalance(wallet.address).then((wallet_balance) => {
+                        this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
+                        result(wallet_balance)
+                    }).catch((err) => {
+                        this.logger.error(err);
+                        error(err)
+                    })
+                    break;
 
-            case 'gnosis':
-                this.gnosisChainBalance(wallet.address).then((wallet_balance) => {
-                    this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
-                    result(wallet_balance)
-                }).catch((err) => {
-                    this.logger.error(err);
-                    error(err)
-                })
-                break;
+                case 'paymaster':
+                    this.getPaymasterBalance(wallet.address).then((wallet_balance) => {
+                        this.logger.info(`Setting wallet ballance for ${wallet.name} value at ${wallet_balance}`)
+                        result(wallet_balance)
+                    }).catch((err) => {
+                        this.logger.error(err);
+                        error(err)
+                    })
+                    break;
 
-            default:
-                break;
-        }
-    })
-}
+                default:
+                    break;
+            }
+        })
+    }
 
 
     async polygonChainBalance(address) {
@@ -163,6 +172,19 @@ class MetricsService {
             return parseInt(response.data.result) / Math.pow(10, this.chains.gnosis.decimal_point)
         } catch (error) {
             this.logger.error(error.response.body);
+        }
+    }
+
+    async getPaymasterBalance(address) {
+        try {
+            const web3 = new Web3(this.chains.paymaster.node)
+            let contract = new web3.eth.Contract(JSON.parse(this.chains.paymaster.ABI), address)
+            let getRelayHubDeposit = contract.methods.getRelayHubDeposit();
+            let balance = await getRelayHubDeposit.call()
+            console.log(balance)
+            return parseInt(balance) / Math.pow(10, 18)
+        } catch (error) {
+            this.logger.error(error);
         }
     }
 
