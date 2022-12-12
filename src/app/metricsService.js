@@ -45,13 +45,13 @@ class MetricsService {
                     let newWallet = { ...wallet, chain: chain }
                     this.logger.debug("Wallet", newWallet);
                     const wallet_balance = await this.getBalance(newWallet)
-                    const token = this.getChainToken(newWallet.chain)
+                    const token = await this.getChainToken(newWallet.chain)
                     this.balance.set({ name: newWallet.name, chain: newWallet.chain, token: token, address: newWallet.address }, wallet_balance)
                 }
             } else {
                 this.logger.debug("Wallet", wallet);
                 const wallet_balance = await this.getBalance(wallet)
-                const token = this.getChainToken(wallet.chain)
+                const token = await this.getChainToken(wallet.chain)
                 this.balance.set({ name: wallet.name, chain: wallet.chain, token: token, address: wallet.address }, wallet_balance)
 
             }
