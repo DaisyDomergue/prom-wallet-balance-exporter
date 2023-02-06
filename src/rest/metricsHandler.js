@@ -8,7 +8,7 @@ class metricsHandler {
 		this.metricsService = metricsService
 	}
 
-	sendResponse(res, status, response, responseType) {
+	sendJsonResponse(res, status, response, responseType) {
 		res.set('content-type', responseType)
 		res.status(status)
 		res.send(response)
@@ -24,7 +24,7 @@ class metricsHandler {
 			this.logger.info("Requesting for a handle")
 			const {metrics,metricsContentType} = await this.metricsService.getMetrics()
 			this.logger.info("Response from get metrics function",metrics)
-			this.sendResponse(res, 200, metrics, metricsContentType)
+			this.sendJsonResponse(res, 200, metrics, metricsContentType)
 		} catch (err) {
 			this.logger.error(err)
 			this.sendJsonError(res, 400, err.message)
