@@ -157,8 +157,8 @@ class MetricsService {
     async gnosisChainBalance(address) {
         const requestUrl = url.parse(url.format({
             protocol: 'https',
-            hostname: 'blockscout.com',
-            pathname: '/xdai/mainnet/api',
+            hostname: 'api.gnosisscan.io',
+            pathname: '/api',
             query: {
                 "module": "account",
                 "action": "balance",
