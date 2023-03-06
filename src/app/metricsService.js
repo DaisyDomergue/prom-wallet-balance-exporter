@@ -181,7 +181,6 @@ class MetricsService {
             let contract = new web3.eth.Contract(JSON.parse(this.chains.paymaster.ABI), address)
             let getRelayHubDeposit = contract.methods.getRelayHubDeposit();
             let balance = await getRelayHubDeposit.call()
-            console.log(balance)
             return parseInt(balance) / Math.pow(10, 18)
         } catch (error) {
             this.logger.error(error);
