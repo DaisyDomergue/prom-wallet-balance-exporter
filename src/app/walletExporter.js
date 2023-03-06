@@ -21,7 +21,7 @@ const gnosis = JSON.parse(process.env.gnosis)
 const paymaster = JSON.parse(process.env.paymaster)
 const wallets = JSON.parse(process.env.wallets)
 const PORT = process.env.PORT
-console.log(polygon,ethereum,gnosis,wallets)
+
 const chains = {
     polygon,
     ethereum,
