@@ -108,6 +108,8 @@ class MetricsService {
                 default:
                     break;
             }
+        }).catch((error) => {
+            this.logger.error(error)
         })
     }
 
